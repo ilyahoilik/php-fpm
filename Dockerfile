@@ -1,12 +1,14 @@
 ARG PHP_VERSION="8.4-rc"
 
 FROM php:${PHP_VERSION}-fpm-alpine
-ARG PHP_EXTENSIONS="@composer"
-ARG ALPINE_PACKAGES="fcgi"
-ARG ALPINE_TEMP_PACKAGES="shadow"
-ARG BASE_DIRECTORY="/app"
-ARG USER_ID=33
-ARG GROUP_ID=33
+ENV PHP_EXTENSIONS="@composer" \
+    REQUIRED_PACKAGES="fcgi" \
+    REQUIRED_TEMP_PACKAGES="shadow" \
+    ALPINE_PACKAGES="" \
+    ALPINE_TEMP_PACKAGES="" \
+    BASE_DIRECTORY="/app" \
+    USER_ID=33 \
+    GROUP_ID=33
 
 COPY --chmod=0777 cmd/docker-php-healthcheck /usr/local/bin/docker-php-healthcheck
 COPY --chmod=0777 cmd/docker-php-install /usr/local/bin/docker-php-install
@@ -14,7 +16,7 @@ COPY --chmod=0777 cmd/docker-set-id /usr/local/bin/docker-set-id
 
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache $ALPINE_PACKAGES $ALPINE_TEMP_PACKAGES && \
+    apk add --no-cache $REQUIRED_PACKAGES $REQUIRED_TEMP_PACKAGES $ALPINE_PACKAGES $ALPINE_TEMP_PACKAGES && \
     \
     docker-set-id www-data $USER_ID:$GROUP_ID && \
     \
@@ -34,7 +36,7 @@ RUN apk update && \
     echo 'group =' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'pm.status_path = /status' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     \
-    apk del $ALPINE_TEMP_PACKAGES && \
+    apk del $ALPINE_TEMP_PACKAGES $REQUIRED_TEMP_PACKAGES && \
     apk cache clean && \
     rm /usr/local/bin/docker-php-install && \
     rm /usr/local/bin/docker-set-id
