@@ -2,17 +2,18 @@ ARG PHP_VERSION="8.4-rc"
 
 FROM php:${PHP_VERSION}-fpm-alpine
 ARG PHP_EXTENSIONS="@composer"
-ARG ALPINE_PACKAGES="fcgi shadow"
+ARG ALPINE_PACKAGES="fcgi"
 ARG ALPINE_TEMP_PACKAGES="shadow"
 ARG BASE_DIRECTORY="/app"
-ARG USER_ID=501
-ARG GROUP_ID=20
+ARG USER_ID=33
+ARG GROUP_ID=33
 
 COPY --chmod=0777 cmd/docker-php-healthcheck /usr/local/bin/docker-php-healthcheck
 COPY --chmod=0777 cmd/docker-php-install /usr/local/bin/docker-php-install
 COPY --chmod=0777 cmd/docker-set-id /usr/local/bin/docker-set-id
 
 RUN apk update && \
+    apk upgrade && \
     apk add --no-cache $ALPINE_PACKAGES $ALPINE_TEMP_PACKAGES && \
     \
     docker-set-id www-data $USER_ID:$GROUP_ID && \
